@@ -9,8 +9,10 @@ function App() {
   let [apiData, setAPIData] = useState([]);
   let [selectedBlogData, setSelectedBlogData] = useState({});
   let [deleteDataID, setDeleteDataID] = useState("");
+  let [selectedBlogIndex, setSelectedBlogIndex] = useState("");
   let [dataDeleted, setDataDelated] = useState(false);
-  const [modalIsOpen, setIsOpen] = useState(false);
+  let [modalIsOpen, setIsOpen] = useState(false);
+  let [requestType, setRequestType] = useState("");
 
   const customStyles = {
     content: {
@@ -24,20 +26,24 @@ function App() {
       height: "80%",
     },
   };
-
+  // Initially fetch all data to show list
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("http://localhost:5500/product");
+        const response = await axios.get("http://localhost:5500/product?sort=des");
         setAPIData(response.data);
-        setSelectedBlogData(response.data[0]);
+        if (selectedBlogIndex) {
+          setSelectedBlogData(response.data[selectedBlogIndex]);
+        } else {
+          setSelectedBlogData(response.data[0]);
+        }
       } catch (error) {
         console.error("Error fetching data:", error.message);
       }
     };
     fetchData();
   }, [dataDeleted]);
-
+  // Delete data according to specific _id
   useEffect(() => {
     const handleDeleteBlogData = async () => {
       try {
@@ -46,6 +52,7 @@ function App() {
         );
         console.log(response, "Deleted");
         setDataDelated(!dataDeleted);
+        setSelectedBlogIndex(0);
       } catch (error) {
         console.log(error);
       }
@@ -63,18 +70,20 @@ function App() {
     }
   }, [deleteDataID]);
 
-  function openModal() {
+  function openModal(e, type) {
+    setRequestType(type);
     setIsOpen(true);
   }
 
   function closeModal() {
     setIsOpen(false);
+    setRequestType("");
   }
-
+  // Create and update data according to request type
   const handleFormSubmit = async (event) => {
     event.preventDefault();
     const formData = new FormData(event.target);
-    const updatedBlogData = {
+    const blogDataPayload = {
       title: formData.get("title"),
       author: formData.get("author"),
       content: formData.get("content"),
@@ -83,11 +92,20 @@ function App() {
       contact: formData.get("contact"),
     };
     try {
-      const response = await axios.put(
-        `http://localhost:5500/product/update?uuid=${selectedBlogData._id}`,
-        updatedBlogData
-      );
-      console.log(response.data);
+      if (requestType === "Create") {
+        const response = await axios.post(
+          `http://localhost:5500/product/create`,
+          blogDataPayload
+        );
+        console.log(response.data);
+      }
+      if (requestType === "Update") {
+        const response = await axios.put(
+          `http://localhost:5500/product/update?uuid=${selectedBlogData._id}`,
+          blogDataPayload
+        );
+        console.log(response.data);
+      }
       closeModal();
       setDataDelated(!dataDeleted);
     } catch (error) {
@@ -121,7 +139,9 @@ function App() {
           <LeftComponent
             title="Blog Title"
             data={apiData}
+            openModal={openModal}
             setSelectedBlogData={setSelectedBlogData}
+            setSelectedBlogIndex={setSelectedBlogIndex}
           />
         </div>
         <div style={{ width: "70%" }}>
@@ -146,54 +166,74 @@ function App() {
         <div className="modal-content no-scrollbar">
           <span className="close-icon" onClick={closeModal}></span>
           <span style={{ fontSize: "22px", fontWeight: "500" }}>
-            Update Item
+            {requestType} item
           </span>
           <form onSubmit={handleFormSubmit}>
             <div>
-              <label>Title:</label>
+              <label>Title</label>
               <input
+                required
                 type="text"
                 name="title"
-                defaultValue={selectedBlogData.title}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.title
+                }
               />
             </div>
             <div>
-              <label>Author:</label>
+              <label>Author</label>
               <input
+                required
                 type="text"
                 name="author"
-                defaultValue={selectedBlogData.author}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.author
+                }
               />
             </div>
             <div>
-              <label>Content:</label>
+              <label>Content</label>
               <textarea
+                required
                 name="content"
-                defaultValue={selectedBlogData.content}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.content
+                }
               ></textarea>
             </div>
             <div>
-              <label>Address:</label>
+              <label>Address</label>
               <input
+                required
                 type="text"
                 name="address"
-                defaultValue={selectedBlogData.address}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.address
+                }
               />
             </div>
             <div>
-              <label>City:</label>
+              <label>City</label>
               <input
+                required
                 type="text"
                 name="city"
-                defaultValue={selectedBlogData.city}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.city
+                }
               />
             </div>
             <div>
-              <label>Contact:</label>
+              <label>Contact</label>
               <input
+                required
                 type="text"
                 name="contact"
-                defaultValue={selectedBlogData.contact}
+                defaultValue={
+                  requestType === "Create" ? "" : selectedBlogData.contact
+                }
+                pattern="[0-9]{10}"
+                title="Please enter a 10-digit valid mobile number"
               />
             </div>
             <button type="submit">Update</button>

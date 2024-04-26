@@ -3,8 +3,8 @@ import { Resizable } from "re-resizable";
 import "../App.css";
 
 function LeftComponent(props) {
-  const { data, title, setSelectedBlogData } = props;
-  console.log(data,'11111111111111111111111111111')
+  const { data, title, setSelectedBlogData, setSelectedBlogIndex, openModal } =
+    props;
   const containerStyle = {
     display: "flex",
     flexDirection: "column",
@@ -19,7 +19,7 @@ function LeftComponent(props) {
     // border: "1px solid #ddd",
     background: "rgb(240 240 240 / 24%)",
     padding: "10px",
-    textAlign: "center"
+    textAlign: "center",
   };
 
   const bottomDivStyle = {
@@ -35,9 +35,10 @@ function LeftComponent(props) {
     cursor: "pointer",
   };
 
-  const handleSingleBlogClick = (e, selectedItem) => {
+  const handleSingleBlogClick = (e, selectedItem, index) => {
     e.preventDefault();
     setSelectedBlogData(selectedItem);
+    setSelectedBlogIndex(index);
   };
 
   return (
@@ -56,7 +57,7 @@ function LeftComponent(props) {
               <div
                 className="side-bar-data-container"
                 key={index}
-                onClick={(e) => handleSingleBlogClick(e, item)}
+                onClick={(e) => handleSingleBlogClick(e, item, index)}
               >
                 <div className="title-container">
                   <span style={{ fontSize: "12px" }}>Title</span>
@@ -69,7 +70,9 @@ function LeftComponent(props) {
               </div>
             ))}
         </div>
-        <div style={bottomDivStyle}>Create Your New Blog</div>
+        <div onClick={(e) => openModal(e, "Create")} style={bottomDivStyle}>
+          Create Your New Blog
+        </div>
       </Resizable>
     </div>
   );

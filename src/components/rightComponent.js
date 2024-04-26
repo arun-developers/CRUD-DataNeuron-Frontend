@@ -6,7 +6,6 @@ function RightComponent(props) {
   const {
     selectedBlogData,
     setDeleteDataID,
-    setUpdateDataID,
     openModal,
     title,
   } = props;
@@ -57,7 +56,7 @@ function RightComponent(props) {
         </div>
         <div className="update-delete-blog">
           <button
-            onClick={openModal}
+            onClick={(e) => openModal(e, "Update")}
             style={{ background: "teal" }}
           >
             Update
