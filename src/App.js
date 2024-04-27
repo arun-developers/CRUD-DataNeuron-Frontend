@@ -41,7 +41,7 @@ function App() {
         const updatedCounts = await Promise.all(
           apiCountObj.map(async (api) => {
             const response = await axios.get(
-              `http://localhost:5500/requestTrafficLog?q=${api.path}`
+              `https://crud-dataneuron-backend.onrender.com/requestTrafficLog?q=${api.path}`
             );
             return { ...api, count: response.data[0].count };
           })
@@ -59,7 +59,7 @@ function App() {
     const fetchData = async () => {
       try {
         const response = await axios.get(
-          "http://localhost:5500/product?sort=des"
+          "https://crud-dataneuron-backend.onrender.com/product?sort=des"
         );
         setAPIData(response.data);
         if (selectedBlogIndex) {
@@ -78,7 +78,7 @@ function App() {
     const handleDeleteBlogData = async () => {
       try {
         const response = await axios.delete(
-          `http://localhost:5500/product/delete?uuid=${deleteDataID}`
+          `https://crud-dataneuron-backend.onrender.com/product/delete?uuid=${deleteDataID}`
         );
         console.log(response, "Deleted");
         setDataDelated(!dataDeleted);
@@ -124,14 +124,14 @@ function App() {
     try {
       if (requestType === "Create") {
         const response = await axios.post(
-          `http://localhost:5500/product/create`,
+          `https://crud-dataneuron-backend.onrender.com/product/create`,
           blogDataPayload
         );
         console.log(response.data);
       }
       if (requestType === "Update") {
         const response = await axios.put(
-          `http://localhost:5500/product/update?uuid=${selectedBlogData._id}`,
+          `https://crud-dataneuron-backend.onrender.com/product/update?uuid=${selectedBlogData._id}`,
           blogDataPayload
         );
         console.log(response.data);
