@@ -13,6 +13,14 @@ function App() {
   let [dataDeleted, setDataDelated] = useState(false);
   let [modalIsOpen, setIsOpen] = useState(false);
   let [requestType, setRequestType] = useState("");
+  let [apiCountObj, setAPICountObj] = useState([
+    { method: "GET", count: 0, path: "/product" },
+    { method: "POST", count: 0, path: "/product/create" },
+    { method: "PUT", count: 0, path: "/product/update" },
+    { method: "DELETE", count: 0, path: "/product/delete" },
+    { method: "Traffic", count: 0, path: "/requestTrafficLog" },
+  ]);
+  let [apiTraffic, setAPITraffic] = useState(0);
 
   const customStyles = {
     content: {
@@ -26,11 +34,34 @@ function App() {
       height: "80%",
     },
   };
+
+  // get  API Traffic Count
+  useEffect(() => {
+    const fetchTrafficAPICount = async () => {
+      try {
+        const updatedCounts = await Promise.all(
+          apiCountObj.map(async (api) => {
+            const response = await axios.get(
+              `http://localhost:5500/requestTrafficLog?q=${api.path}`
+            );
+            return { ...api, count: response.data[0].count };
+          })
+        );
+        setAPICountObj(updatedCounts);
+      } catch (error) {
+        console.error("Error fetching data:", error.message);
+      }
+    };
+    fetchTrafficAPICount();
+  }, [dataDeleted]);
+
   // Initially fetch all data to show list
   useEffect(() => {
     const fetchData = async () => {
       try {
-        const response = await axios.get("https://crud-dataneuron-backend.onrender.com/product?sort=des");
+        const response = await axios.get(
+          "http://localhost:5500/product?sort=des"
+        );
         setAPIData(response.data);
         if (selectedBlogIndex) {
           setSelectedBlogData(response.data[selectedBlogIndex]);
@@ -48,7 +79,7 @@ function App() {
     const handleDeleteBlogData = async () => {
       try {
         const response = await axios.delete(
-          `https://crud-dataneuron-backend.onrender.com/product/delete?uuid=${deleteDataID}`
+          `http://localhost:5500/product/delete?uuid=${deleteDataID}`
         );
         console.log(response, "Deleted");
         setDataDelated(!dataDeleted);
@@ -94,14 +125,14 @@ function App() {
     try {
       if (requestType === "Create") {
         const response = await axios.post(
-          `https://crud-dataneuron-backend.onrender.com/product/create`,
+          `http://localhost:5500/product/create`,
           blogDataPayload
         );
         console.log(response.data);
       }
       if (requestType === "Update") {
         const response = await axios.put(
-          `https://crud-dataneuron-backend.onrender.com/product/update?uuid=${selectedBlogData._id}`,
+          `http://localhost:5500/product/update?uuid=${selectedBlogData._id}`,
           blogDataPayload
         );
         console.log(response.data);
@@ -117,21 +148,16 @@ function App() {
     <div className="main-container">
       <div className="header">
         <div>
-          <h3>API Calling</h3>
+          <h4>API Calling</h4>
         </div>
         <div className="trafic-count">
-          <p>
-            GET : <span>1</span>
-          </p>
-          <p>
-            POST (CREATE) : <span>1</span>
-          </p>
-          <p>
-            PUT (UPDATE) : <span>1</span>
-          </p>
-          <p>
-            DELETE (REMOVE) : <span>1</span>
-          </p>
+          {apiCountObj &&
+            apiCountObj.length > 0 &&
+            apiCountObj.map((item, index) => (
+              <p key={index}>
+                {item.method} : <span>{item.count}</span>
+              </p>
+            ))}
         </div>
       </div>
       <div className="top-container">
