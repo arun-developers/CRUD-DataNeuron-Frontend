@@ -20,7 +20,6 @@ function App() {
     { method: "DELETE", count: 0, path: "/product/delete" },
     { method: "Traffic", count: 0, path: "/requestTrafficLog" },
   ]);
-  let [apiTraffic, setAPITraffic] = useState(0);
 
   const customStyles = {
     content: {
